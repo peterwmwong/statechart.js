@@ -310,7 +310,7 @@ describe('Router', function() {
         router.params({a: 'b', c: 'd'});
         expect(router.params()).toEqual({a: 'b', c: 'd'});
 
-        router.params({x: 'y'}, true);
+        router.params({x: 'y'}, {replace: true});
         expect(router.params()).toEqual({x: 'y'});
       });
 
@@ -321,6 +321,21 @@ describe('Router', function() {
         router.params({a: undefined, b: '22', c: false, d: null, e: 0});
         expect(router.params()).toEqual({b: '22', e: 0});
       });
+
+      describe('with push option', function() {
+        it('invokes pushState when only the search params have changed', function() {
+          router.route(this.showRoute);
+          router.params({id: 5});
+          router.flush();
+          expect(this.window.history.pushState).toHaveBeenCalledWith({}, null, '/foos/5');
+
+          router.params({foo: 'a', bar: 'b'}, {push: true});
+          router.flush({push: true});
+          expect(this.window.history.pushState).toHaveBeenCalledWith({}, null, '/foos/5?foo=a&bar=b');
+          expect(this.window.history.replaceState).not.toHaveBeenCalled();
+        });
+      });
+
     });
 
     describe('#urlFor', function() {

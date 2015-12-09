@@ -383,7 +383,6 @@ describe('Router', function() {
           setTimeout(function() {
             router.params({foo: 'a', bar: 'b'}, {replace: false});
           }, 102);
-          debugger // eslint-disable-line
           jasmine.clock().tick(103);
 
           expect(router.params()).toEqual({id:6, foo: 'a', bar: 'b'});

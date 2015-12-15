@@ -310,7 +310,7 @@ describe('Router', function() {
         router.params({a: 'b', c: 'd'});
         expect(router.params()).toEqual({a: 'b', c: 'd'});
 
-        router.params({x: 'y'}, {replace: true});
+        router.params({x: 'y'}, {merge: false});
         expect(router.params()).toEqual({x: 'y'});
       });
 
@@ -338,7 +338,7 @@ describe('Router', function() {
           router.params({a: 'b', c: 'd'});
           expect(router.params()).toEqual({a: 'b', c: 'd'});
 
-          router.params({x: 'y', a: 'blah'}, {replace: false});
+          router.params({x: 'y', a: 'blah'}, {merge: true});
           expect(router.params()).toEqual({a: 'blah', c: 'd', x: 'y'});
         });
 
@@ -347,7 +347,7 @@ describe('Router', function() {
           router.params({a: 'b', c: 'd'});
           expect(router.params()).toEqual({a: 'b', c: 'd'});
 
-          router.params({x: 'y', a: 'ok'}, {replace: true});
+          router.params({x: 'y', a: 'ok'}, {merge: false});
           expect(router.params()).toEqual({x: 'y', a: 'ok'});
         });
 
@@ -381,7 +381,7 @@ describe('Router', function() {
           expect(this.window.history.pushState).toHaveBeenCalledWith({}, null, '/foos/6');
 
           setTimeout(function() {
-            router.params({foo: 'a', bar: 'b'}, {replace: false});
+            router.params({foo: 'a', bar: 'b'}, {push: true});
           }, 102);
           jasmine.clock().tick(103);
 

@@ -322,8 +322,7 @@ describe('Router', function() {
         expect(router.params()).toEqual({b: '22', e: 0});
       });
 
-
-      describe('with replaceState', function() {
+      describe('[deprecated] boolean merge argument', function() {
         beforeEach(function() {
           router._timer = undefined;
           jasmine.clock().install();
@@ -338,7 +337,7 @@ describe('Router', function() {
           router.params({a: 'b', c: 'd'});
           expect(router.params()).toEqual({a: 'b', c: 'd'});
 
-          router.params({x: 'y', a: 'blah'}, {merge: true});
+          router.params({x: 'y', a: 'blah'}, false);
           expect(router.params()).toEqual({a: 'blah', c: 'd', x: 'y'});
         });
 
@@ -347,8 +346,67 @@ describe('Router', function() {
           router.params({a: 'b', c: 'd'});
           expect(router.params()).toEqual({a: 'b', c: 'd'});
 
+          router.params({x: 'y', a: 'ok'}, true);
+          expect(router.params()).toEqual({x: 'y', a: 'ok'});
+        });
+      });
+
+      describe('with merge', function() {
+        beforeEach(function() {
+          router._timer = undefined;
+          jasmine.clock().install();
+        });
+
+        afterEach(function() {
+          jasmine.clock().uninstall();
+        });
+
+        it('set to true, merges with existing params', function() {
+          router.route(this.searchRoute);
+          router.params({a: 'b', c: 'd'});
+          expect(router.params()).toEqual({a: 'b', c: 'd'});
+
+          router.params({x: 'y', a: 'blah'}, {merge: true});
+          expect(router.params()).toEqual({a: 'blah', c: 'd', x: 'y'});
+        });
+
+        it('set to false, replaces with existing params', function() {
+          router.route(this.searchRoute);
+          router.params({a: 'b', c: 'd'});
+          expect(router.params()).toEqual({a: 'b', c: 'd'});
+
           router.params({x: 'y', a: 'ok'}, {merge: false});
           expect(router.params()).toEqual({x: 'y', a: 'ok'});
+        });
+      });
+
+      describe('with push', function() {
+        beforeEach(function() {
+          router._timer = undefined;
+          jasmine.clock().install();
+        });
+
+        afterEach(function() {
+          jasmine.clock().uninstall();
+        });
+
+        it('set to true, invokes pushState when only the search params have changed', function() {
+          router.route(this.showRoute);
+          setTimeout(function() {
+            router.params({id: 6});
+          }, 100);
+          jasmine.clock().tick(101);
+
+          expect(router.params()).toEqual({id: 6});
+          expect(this.window.history.pushState).toHaveBeenCalledWith({}, null, '/foos/6');
+
+          setTimeout(function() {
+            router.params({foo: 'a', bar: 'b'}, {push: true});
+          }, 102);
+          jasmine.clock().tick(103);
+
+          expect(router.params()).toEqual({id:6, foo: 'a', bar: 'b'});
+          expect(this.window.history.pushState).toHaveBeenCalledWith({}, null, '/foos/6?foo=a&bar=b');
         });
 
         it('unset, invokes replaceState when only params changed', function() {
@@ -368,25 +426,6 @@ describe('Router', function() {
 
           expect(router.params()).toEqual({id:5, foo: 'a', bar: 'b'});
           expect(this.window.history.replaceState).toHaveBeenCalledWith({}, null, '/foos/5?foo=a&bar=b');
-        });
-
-        it('set to false, invokes pushState when only the search params have changed', function() {
-          router.route(this.showRoute);
-          setTimeout(function() {
-            router.params({id: 6});
-          }, 100);
-          jasmine.clock().tick(101);
-
-          expect(router.params()).toEqual({id: 6});
-          expect(this.window.history.pushState).toHaveBeenCalledWith({}, null, '/foos/6');
-
-          setTimeout(function() {
-            router.params({foo: 'a', bar: 'b'}, {push: true});
-          }, 102);
-          jasmine.clock().tick(103);
-
-          expect(router.params()).toEqual({id:6, foo: 'a', bar: 'b'});
-          expect(this.window.history.pushState).toHaveBeenCalledWith({}, null, '/foos/6?foo=a&bar=b');
         });
       });
     });
